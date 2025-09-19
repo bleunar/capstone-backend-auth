@@ -50,13 +50,6 @@ def get_db_connection():
         return None
 
 
-# fetching access levels
-def get_access_levels():
-    with open('access_levels.json', 'r') as f:
-        data_as_dict = json.load(f)
-        return list(data_as_dict.values())
-
-
 # fetching mail server
 def get_mail_server():
     try:

@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
-from services.core import connection_pool
-from services.log import log
+from app.services.core import connection_pool
+from app.services.log import log
 from mysql.connector import Error, MySQLConnection
 from mysql.connector.cursor import MySQLCursor
 

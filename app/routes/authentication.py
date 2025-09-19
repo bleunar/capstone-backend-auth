@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, request
-import services.database as database
+import app.services.database as database
 from flask_jwt_extended import (create_access_token, create_refresh_token, set_refresh_cookies, jwt_required, unset_jwt_cookies, get_jwt_identity, decode_token )
 from werkzeug.security import check_password_hash
-from services.system import log_account
+from app.services.system import log_account
 
 auth_bp = Blueprint("auth", __name__)
 

@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-import services.access
+import app.services.access
 load_dotenv()
 
 # default key if missing
@@ -32,6 +32,6 @@ class Config:
     # web client
     WEB_CLIENT_HOSTS = [url.strip() for url in os.environ.get("WEB_CLIENT_HOSTS").split(',')]
 
-    access_levels = services.access.access_level_lookup()
+    access_levels = app.services.access.access_level_lookup()
 
 config = Config()

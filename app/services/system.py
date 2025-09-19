@@ -1,6 +1,6 @@
 from datetime import datetime
 import json
-from services.log import log
+from app.services.log import log
 
 def get_service_information():
     with open('service_information.json', 'r') as f:

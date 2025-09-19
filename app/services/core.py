@@ -1,10 +1,10 @@
 import mysql.connector
-from config import config
+from app.app_config import config
 import json
 import smtplib
 from flask_jwt_extended import JWTManager
 from flask import Flask
-from services.log import log
+from app.services.log import log
 
 # instance of flask and jwt
 app = Flask(__name__)

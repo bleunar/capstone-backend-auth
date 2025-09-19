@@ -38,4 +38,4 @@ CORS(app, origins=config.WEB_CLIENT_HOSTS, supports_credentials=True)
 # main method
 if __name__ == "__main__":
     system_check()
-    app.run(debug=config.FLASK_ENVIRONMENT == "development", host=config.BACKEND_ADDRESS, port=config.BACKEND_PORT)
+    app.run(debug=config.FLASK_ENVIRONMENT == "development", host="0.0.0.0", port=5000)

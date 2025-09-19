@@ -10,7 +10,7 @@ def get_service_information():
 
 
 # account log class
-import services.database as database
+import app.services.database as database
 
 class log_account:
     def login(account_id: int) -> bool:
@@ -25,7 +25,7 @@ class log_account:
 
 # system startup check
 def system_check() -> bool:
-    from services.core import get_db_connection, get_mail_server
+    from app.services.core import get_db_connection, get_mail_server
 
     log.inform("SYSTEM-INIT", f"\n{'\\'*25}  SYSTEM INIT  {25*'\\'}\n")
     log.inform("SYSTEM-INIT", "Starting system check...")

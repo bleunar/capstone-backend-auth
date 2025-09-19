@@ -36,6 +36,7 @@ def status():
 CORS(app, origins=config.WEB_CLIENT_HOSTS, supports_credentials=True)
 
 # main method
-if __name__ == "__main__":
+def jarvis_deploy_website():
     system_check()
-    app.run(debug=config.FLASK_ENVIRONMENT == "development", host="0.0.0.0", port=5201)
+    
+    return app

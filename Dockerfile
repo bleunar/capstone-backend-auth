@@ -1,11 +1,12 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 
-WORKDIR /
+WORKDIR /app
 
 COPY requirements.txt .
-
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["gunicorn", "--workers", "4", "--threads", "2", "--bind", "0.0.0.0:5201", "app:app"]
+EXPOSE 5000
+
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "wsgi:app"]

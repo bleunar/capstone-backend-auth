@@ -1,0 +1,38 @@
+[
+    {
+        "access_level": 0,
+        "name": "Root Administrator",
+        "codename": "root",
+        "description": "Full System Access and Control"
+    },
+    {
+        "access_level": 1,
+        "name": "Administrator",
+        "codename": "admin",
+        "description": "Access and Control"
+    },
+    {
+        "access_level": 2,
+        "name": "Manager",
+        "codename": "manager",
+        "description": "Access and Analytics"
+    },
+    {
+        "access_level": 3,
+        "name": "Technician",
+        "codename": "technician",
+        "description": "Branch Access and Control"
+    },
+    {
+        "access_level": 4,
+        "name": "Default",
+        "codename": "default",
+        "description": "Default Access"
+    },
+    {
+        "access_level": 5,
+        "name": "Guest",
+        "codename": "guest",
+        "description": "No System Access"
+    }
+]

@@ -50,19 +50,16 @@ def get_db_connection():
         return None
 
 
-# fetching access levels
-def get_access_levels():
-    with open('access_levels.json', 'r') as f:
-        data_as_dict = json.load(f)
-        return list(data_as_dict.values())
-
-
 # fetching mail server
 def get_mail_server():
     try:
-        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server = smtplib.SMTP(config.MAIL_SERVER_ADDRESS, int(config.MAIL_SERVER_PORT))
         server.starttls()
         server.login(config.MAIL_ADDRESS, config.MAIL_PASSKEY)
         return server
-    except:
+    except smtplib.SMTPException as e:
+        log.error("MAIL_SRV-ERR", f"SMTP error: {str(e)}")
+        return None
+    except Exception as e:
+        log.error("MAIL_SRV-ERR", f"Failed to connect with mail server: {str(e)}")
         return None

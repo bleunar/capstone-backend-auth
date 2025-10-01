@@ -1,9 +1,10 @@
 from datetime import datetime
-import json
+import json, os
 from app.services.log import log
 
 def get_service_information():
-    with open('service_information.json', 'r') as f:
+    file_path = os.path.join(os.path.dirname(__file__), '..', 'service_information.json')
+    with open(file_path, 'r') as f:
         data_as_dict = json.load(f)
         return data_as_dict
 

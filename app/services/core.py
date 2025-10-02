@@ -1,5 +1,5 @@
 import mysql.connector
-from app.app_config import config
+from app.config import config
 import json
 import smtplib
 from flask_jwt_extended import JWTManager

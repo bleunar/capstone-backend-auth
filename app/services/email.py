@@ -1,5 +1,5 @@
 import smtplib
-from app.app_config import config
+from app.config import config
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from app.services.core import get_mail_server

@@ -1,6 +1,6 @@
 from flask import jsonify
 import datetime
-from app.app_config import config
+from app.config import config
 from flask_cors import CORS
 from app.services.system import get_service_information
 from app.services.core import get_flask_app

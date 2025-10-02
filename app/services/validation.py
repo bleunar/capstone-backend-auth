@@ -2,9 +2,7 @@ from flask import jsonify, request
 from typing import Dict, Any, Optional, List, Tuple
 
 
-
 # vlidations and checking
-
 def check_json_payload() -> Tuple[Optional[Dict[str, Any]], Optional[Tuple]]:
     try:
         data = request.get_json()
@@ -39,15 +37,6 @@ def check_required_fields(data: Dict[str, Any], required_fields: List[str]) -> O
 
 
 def check_order_parameter(order_param: str) -> str:
-    """
-    Validates and sanitizes order parameter to prevent SQL injection.
-    
-    Args:
-        order_param: Order parameter from request
-        
-    Returns:
-        Safe order string (ASC or DESC)
-    """
     if order_param and order_param.lower() == "latest":
         return "DESC"
     return "ASC"

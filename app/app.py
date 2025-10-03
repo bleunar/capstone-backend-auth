@@ -1,6 +1,7 @@
 from flask import jsonify
 import datetime
 from .config import config
+from zoneinfo import ZoneInfo
 from flask_cors import CORS
 from .services.system import get_service_information
 from .services.core import get_flask_app
@@ -22,13 +23,14 @@ app.url_map.strict_slashes = False
 from .routes.authentication import auth_bp
 app.register_blueprint(auth_bp, url_prefix="/auth")
 
+
 ph_time = datetime.datetime.now(ZoneInfo("Asia/Manila"))
 
-# status endppint 
+# status endpoint
 @app.route("/", methods=["GET"])
 def status():
     data = {
-        "msg": "authen services is up",
+        "msg": "api services is up",
         "date": str(ph_time),
         "info": get_service_information()
     }

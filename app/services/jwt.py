@@ -1,7 +1,7 @@
 from flask_jwt_extended import verify_jwt_in_request, get_jwt
 from flask import jsonify, request
 from functools import wraps
-from app.config import config
+from ..config import config
 
 ACCESS_LEVELS = config.access_levels
 

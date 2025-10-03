@@ -1,8 +1,8 @@
 import smtplib
-from app.config import config
+from ..config import config
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from app.services.core import get_mail_server
+from .core import get_mail_server
 
 
 def send_email(receiver: str, subject: str, body: str, html_body: str = None):

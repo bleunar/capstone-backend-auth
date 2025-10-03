@@ -1,9 +1,9 @@
 from flask import Blueprint, jsonify, request
-import app.services.database as database
+from ..services import database
 from flask_jwt_extended import (create_access_token, create_refresh_token, set_refresh_cookies, jwt_required, unset_jwt_cookies, get_jwt_identity, decode_token )
 from werkzeug.security import check_password_hash
-from app.services.system import log_account
-from app.services.validation import check_json_payload, check_required_fields, common_success_response, common_error_response, common_database_error_response
+from ..services.system import log_account
+from ..services.validation import check_json_payload, check_required_fields, common_success_response, common_error_response, common_database_error_response
 
 auth_bp = Blueprint("auth", __name__)
 

@@ -1,6 +1,6 @@
 from datetime import datetime
 import json, os
-from app.services.log import log
+from .log import log
 
 def get_service_information():
     file_path = os.path.join(os.path.dirname(__file__), '..', 'service_information.json')
@@ -11,7 +11,7 @@ def get_service_information():
 
 
 # account log class
-import app.services.database as database
+from . import database
 
 class log_account:
     def login(account_id: int) -> bool:
@@ -26,7 +26,7 @@ class log_account:
 
 # system startup check
 def system_check() -> bool:
-    from app.services.core import get_db_connection, get_mail_server
+    from .core import get_db_connection, get_mail_server
 
     log.inform("SYSTEM-INIT", f"\n{'\\'*25}  SYSTEM INIT  {25*'\\'}\n")
     log.inform("SYSTEM-INIT", "Starting system check...")

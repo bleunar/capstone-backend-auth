@@ -1,11 +1,10 @@
 from flask import jsonify
 import datetime
-from zoneinfo import ZoneInfo
-from app.app_config import config
+from .config import config
 from flask_cors import CORS
-from app.services.system import get_service_information
-from app.services.core import get_flask_app
-from app.services.system import system_check
+from .services.system import get_service_information
+from .services.core import get_flask_app
+from .services.system import system_check
 
 app = get_flask_app()
 app.config["SECRET_KEY"] = config.FLASK_SECRET_KEY
@@ -20,7 +19,7 @@ app.config["JWT_COOKIE_CSRF_PROTECT"] = True
 app.url_map.strict_slashes = False
 
 # ENDPOINTS FROM BLUEPRINTS
-from app.routes.authentication import auth_bp
+from .routes.authentication import auth_bp
 app.register_blueprint(auth_bp, url_prefix="/auth")
 
 ph_time = datetime.datetime.now(ZoneInfo("Asia/Manila"))

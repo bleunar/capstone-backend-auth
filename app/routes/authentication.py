@@ -1,20 +1,23 @@
 from flask import Blueprint, jsonify, request
-import app.services.database as database
+from ..services import database
 from flask_jwt_extended import (create_access_token, create_refresh_token, set_refresh_cookies, jwt_required, unset_jwt_cookies, get_jwt_identity, decode_token )
 from werkzeug.security import check_password_hash
-from app.services.system import log_account
+from ..services.system import log_account
+from ..services.validation import check_json_payload, check_required_fields, common_success_response, common_error_response, common_database_error_response
 
 auth_bp = Blueprint("auth", __name__)
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
-    data = request.get_json()
-
-    if not data or not data.get('username') or not data.get('password'):
-        result = jsonify({
-            "msg": "Missing username or password"
-        })
-        return result, 400
+    # validate JSON payload
+    data, error_response = check_json_payload()
+    if error_response:
+        return error_response
+    
+    # check required fields
+    required_fields_error = check_required_fields(data, ['username', 'password'])
+    if required_fields_error:
+        return required_fields_error
 
     username = data['username']
     password = data['password']
@@ -38,39 +41,29 @@ def login():
     account_database = database.fetch_one(login_query, (username, ))
 
     if not account_database['success']:
-        result = jsonify({
-            "msg": "failed to login, " + account_database['msg']
-        })
-        return result, 400
+        return common_database_error_response(account_database)
     
-    if account_database['success'] and not account_database['data']:
-        result = jsonify({
-            "msg": "account not found"
-        })
-        return result, 400
+    if not account_database['data']:
+        return common_error_response("Account not found", 404)
     
 
     # ACCOUNT STATUS CHECK
-    if not account_database['data']['status'] == 'active':
-        result = jsonify({
-            "msg": "account not found"
-        })
-        return result, 400
-    
-    if account_database['data']['status'] == 'suspended':
-        result = jsonify({
-            "msg": "account suspended. contact administrator for assistance."
-        })
-        return result, 400
+    account_status = account_database['data']['status']
+    if account_status == 'suspended':
+        return common_error_response("Account suspended. Contact administrator for assistance.", 403)
+    elif account_status == 'deleted':
+        return common_error_response("Account not found", 404)
+    elif account_status != 'active':
+        return common_error_response("Account not available", 403)
     
     # ACCOUNT PASSWORD CHECK
     account_password_hash = database.fetch_scalar("select a.password_hash from accounts as a where a.id = %s;", (account_database['data']['id'], ))
 
+    if not account_password_hash['success']:
+        return common_database_error_response(account_password_hash)
+    
     if not check_password_hash(account_password_hash['data'], password):
-        result = jsonify({
-            "msg": "password incorrect"
-        })
-        return result, 400
+        return common_error_response("Invalid credentials", 401)
 
     # SETUP TOKEN
     added_claims = {
@@ -81,14 +74,19 @@ def login():
     access_token = create_access_token(identity=account_database['data']['id'], additional_claims=added_claims, expires_delta=None)
     refresh_token = create_refresh_token(identity=account_database['data']['id'], additional_claims=added_claims, expires_delta=None)
 
-    response = jsonify({
+    # Log successful login
+    log_account.login(account_database['data']['id'])
+    
+    response_data = {
         "tkn_ref": refresh_token,
         "tkn_acc": access_token,
-    })
-
+        "user_id": account_database['data']['id'],
+        "access_level": account_database['data']['access_level']
+    }
+    
+    response = jsonify(response_data)
     set_refresh_cookies(response, refresh_token)
-    log_account.login(account_database['data']['id'])
-
+    
     return response, 200
 
 
@@ -100,27 +98,21 @@ def logout():
     account_database = database.fetch_one("select a.id, a.username from accounts as a where a.id = %s;", (account_id, ))
     
     if not account_database['success']:
-        response = jsonify({
-            "msg": "Failed to clear logout"
-        })
-
+        response = jsonify({"success": False, "error": "Failed to process logout"})
         unset_jwt_cookies(response)
-        return response, 400
+        return response, 500
     
-    if account_database['success'] and not account_database['data']:
-        response = jsonify({
-            "msg": "Failed to search account on logout"
-        })
-
+    if not account_database['data']:
+        response = jsonify({"success": False, "error": "Account not found"})
         unset_jwt_cookies(response)
-        return response, 400
+        return response, 404
 
-    response = jsonify({
-        "msg": "Logged out successfuly"
-    })
-    unset_jwt_cookies(response)
+    # Log successful logout
     log_account.logout(account_database['data']['id'])
-
+    
+    response = jsonify({"success": True, "message": "Logged out successfully"})
+    unset_jwt_cookies(response)
+    
     return response, 200
 
 
@@ -129,11 +121,11 @@ def logout():
 @jwt_required()
 def check():
     account_id = get_jwt_identity()
-
-    response = jsonify({
-        "msg": "hello, " + account_id
-    })
-    return response, 200
+    
+    return common_success_response(
+        data={"user_id": account_id}, 
+        message="Token is valid"
+    )
 
 
 
@@ -162,13 +154,16 @@ def refresh_access():
     account_database = database.fetch_one(refresh_query, (account_id,))
 
     if not account_database['success']:
-        return jsonify({"msg": "failed to refresh session"}), 400
+        return common_database_error_response(account_database)
 
-    if account_database['success'] and (not account_database['data'] or account_database['data']['status'] == "deleted"):
-        return jsonify({"msg": "account not found"}), 404
+    if not account_database['data'] or account_database['data']['status'] == "deleted":
+        return common_error_response("Account not found", 404)
     
     if account_database['data']['status'] == 'suspended':
-        return jsonify({"msg": "Account suspended. Contact administrator for support."}), 400
+        return common_error_response("Account suspended. Contact administrator for support.", 403)
+    
+    if account_database['data']['status'] != 'active':
+        return common_error_response("Account not available", 403)
 
 
     # setup token
@@ -179,4 +174,7 @@ def refresh_access():
 
     access_token = create_access_token(identity=account_database['data']['id'], additional_claims=added_claims, expires_delta=None)
 
-    return jsonify(tkn_acc=access_token), 200
+    return common_success_response(
+        data={"tkn_acc": access_token}, 
+        message="Token refreshed successfully"
+    )

@@ -1,10 +1,10 @@
 import mysql.connector
-from app.app_config import config
+from ..config import config
 import json
 import smtplib
 from flask_jwt_extended import JWTManager
 from flask import Flask
-from app.services.log import log
+from .log import log
 
 # instance of flask and jwt
 app = Flask(__name__)
@@ -53,9 +53,13 @@ def get_db_connection():
 # fetching mail server
 def get_mail_server():
     try:
-        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server = smtplib.SMTP(config.MAIL_SERVER_ADDRESS, int(config.MAIL_SERVER_PORT))
         server.starttls()
         server.login(config.MAIL_ADDRESS, config.MAIL_PASSKEY)
         return server
-    except:
+    except smtplib.SMTPException as e:
+        log.error("MAIL_SRV-ERR", f"SMTP error: {str(e)}")
+        return None
+    except Exception as e:
+        log.error("MAIL_SRV-ERR", f"Failed to connect with mail server: {str(e)}")
         return None

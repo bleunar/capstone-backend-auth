@@ -6,6 +6,7 @@ from flask_cors import CORS
 from .services.system import get_service_information
 from .services.core import get_flask_app
 from .services.system import system_check
+from prometheus_flask_exporter import PrometheusMetrics
 
 app = get_flask_app()
 app.config["SECRET_KEY"] = config.FLASK_SECRET_KEY
@@ -38,6 +39,8 @@ def status():
 
 # setup CORS for all endpoint
 CORS(app, origins=config.WEB_CLIENT_HOSTS, supports_credentials=True)
+
+metrics = PrometheusMetrics(app)
 
 # main method
 def jarvis_deploy_website():

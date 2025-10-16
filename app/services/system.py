@@ -26,7 +26,7 @@ class log_account:
 
 # system startup check
 def system_check() -> bool:
-    from .core import get_db_connection, get_mail_server, initialize_database_with_retry
+    from .core import get_db_connection, initialize_database_with_retry
 
     log.inform("SYSTEM-INIT", f"\n{'\\'*25}  SYSTEM INIT  {25*'\\'}\n")
     log.inform("SYSTEM-INIT", "Starting system check...")
@@ -44,12 +44,6 @@ def system_check() -> bool:
         log.inform("SYSTEM-CHECK", "Database connection established and verified with test query")
     else:
         log.error("SYSTEM-CHECK", f"Database connection verification failed: {db_test_result.get('msg', 'Unknown error')}")
-        return False
-    # MAIL SERVER
-    if get_mail_server():
-        log.inform("SYSTEM-INIT", "Mail server connection established")
-    else:
-        log.error("SYSTEM-INIT", "Failed to connect to mail server")
         return False
 
     log.inform("SYSTEM-INIT", "critical checks completed")

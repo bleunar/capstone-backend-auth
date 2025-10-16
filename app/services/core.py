@@ -150,18 +150,3 @@ def force_reconnect_database():
     log.inform("DATABASE", "Forcing database reconnection...")
     reset_connection_pool()
     return initialize_database_with_retry()
-
-
-# fetching mail server
-def get_mail_server():
-    try:
-        server = smtplib.SMTP(config.MAIL_SERVER_ADDRESS, int(config.MAIL_SERVER_PORT))
-        server.starttls()
-        server.login(config.MAIL_ADDRESS, config.MAIL_PASSKEY)
-        return server
-    except smtplib.SMTPException as e:
-        log.error("MAIL_SRV-ERR", f"SMTP error: {str(e)}")
-        return None
-    except Exception as e:
-        log.error("MAIL_SRV-ERR", f"Failed to connect with mail server: {str(e)}")
-        return None

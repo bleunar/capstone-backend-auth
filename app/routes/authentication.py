@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from ..services import database
-from flask_jwt_extended import (create_access_token, create_refresh_token, set_refresh_cookies, jwt_required, unset_jwt_cookies, get_jwt_identity, decode_token )
+from flask_jwt_extended import (create_access_token, create_refresh_token, set_refresh_cookies, jwt_required, unset_jwt_cookies, get_jwt_identity )
 from werkzeug.security import check_password_hash
 from ..services.system import log_account
 from ..services.validation import check_json_payload, check_required_fields, common_success_response, common_error_response, common_database_error_response
@@ -29,6 +29,7 @@ def login():
             a.email,
             a.username,
             a.status,
+            a.password_hash,
             ar.id as role_id,
             ar.access_level
         
@@ -56,13 +57,7 @@ def login():
     elif account_status != 'active':
         return common_error_response("Account not available", 403)
     
-    # ACCOUNT PASSWORD CHECK
-    account_password_hash = database.fetch_scalar("select a.password_hash from accounts as a where a.id = %s;", (account_database['data']['id'], ))
-
-    if not account_password_hash['success']:
-        return common_database_error_response(account_password_hash)
-    
-    if not check_password_hash(account_password_hash['data'], password):
+    if not check_password_hash(account_database['data']['password_hash'], password):
         return common_error_response("Invalid credentials", 401)
 
     # SETUP TOKEN
@@ -116,19 +111,6 @@ def logout():
     return response, 200
 
 
-
-@auth_bp.route('/check', methods=['POST'])
-@jwt_required()
-def check():
-    account_id = get_jwt_identity()
-    
-    return common_success_response(
-        data={"user_id": account_id}, 
-        message="Token is valid"
-    )
-
-
-
 @auth_bp.route('/refresh', methods=['POST'])
 @jwt_required(refresh=True, locations=["cookies"])
 def refresh_access():
@@ -177,4 +159,117 @@ def refresh_access():
     return common_success_response(
         data={"tkn_acc": access_token}, 
         message="Token refreshed successfully"
+    )
+
+
+@auth_bp.route('/me/profile', methods=['GET'])
+@jwt_required()
+def fetch_account_profile():
+
+    # fetch account identity on token
+    account_id = get_jwt_identity()
+
+    # check if identity exists on token
+    if not account_id:
+        response = jsonify({"msg": "failed to fetch current account profile, identity not found"})
+        unset_jwt_cookies(response)
+        return response, 400
+
+    # setup base query
+    base_query = """
+        select
+            a.first_name,
+            a.middle_name,
+            a.last_name,
+            a.username,
+            a.email
+        from accounts as a
+        where a.id = %s;
+    """
+
+    # execute query
+    account_profile_fetch = database.fetch_one(base_query, (account_id, ))
+
+    if not account_profile_fetch['success']:
+        return common_database_error_response(account_profile_fetch)
+
+    return common_success_response(
+        data=account_profile_fetch['data']
+    )
+
+
+@auth_bp.route('/me/credentials', methods=['GET'])
+@jwt_required()
+def fetch_account_credentials():
+
+    # fetch account identity on token
+    account_id = get_jwt_identity()
+
+    # check if identity exists on token
+    if not account_id:
+        response = jsonify({"msg": "failed to fetch current account credentials, identity not found"})
+        unset_jwt_cookies(response)
+        return response, 400
+
+
+    # setup base query
+    base_query = """
+        select
+            a.username,
+            a.email,
+            a.status,
+            a.password_last_updated,
+            ar.id as role_id,
+            ar.name as role_name,
+            ar.access_level as role_access_level
+        from accounts as a
+        JOIN account_roles AS ar ON a.role_id = ar.id
+        where a.id = %s;
+    """
+
+    # execute query
+    account_credential_fetch = database.fetch_one(base_query, (account_id, ))
+
+    if not account_credential_fetch['success']:
+        return common_database_error_response(account_credential_fetch)
+
+    return common_success_response(
+        data=account_credential_fetch['data']
+    )
+
+
+@auth_bp.route('/me/settings', methods=['GET'])
+@jwt_required()
+def fetch_account_settings():
+
+    # fetch account identity on token
+    account_id = get_jwt_identity()
+
+    # check if identity exists on token
+    if not account_id:
+        response = jsonify({"msg": "failed to fetch current account settings, identity not found"})
+        unset_jwt_cookies(response)
+        return response, 400
+
+
+    # setup base query
+    base_query = """
+        select
+            acs.enable_dark_mode,
+            acs.notification_position,
+            acs.notification_duration,
+            acs.notification_sound,
+            acs.updated_at
+        from account_settings as acs
+        where acs.account_id = %s;
+    """
+
+    # execute query
+    account_setting_fetch = database.fetch_one(base_query, (account_id, ))
+
+    if not account_setting_fetch['success']:
+        return common_database_error_response(account_setting_fetch)
+
+    return common_success_response(
+        data=account_setting_fetch['data']
     )

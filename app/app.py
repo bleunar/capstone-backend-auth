@@ -22,7 +22,7 @@ app.url_map.strict_slashes = False
 
 # ENDPOINTS FROM BLUEPRINTS
 from .routes.authentication import auth_bp
-app.register_blueprint(auth_bp, url_prefix="/auth")
+app.register_blueprint(auth_bp, url_prefix="/")
 
 
 ph_time = datetime.datetime.now(ZoneInfo("Asia/Manila"))

@@ -46,19 +46,3 @@ def generate_default_password(fn: str, mn: str, ln: str):
     name_part = (initials + ln).upper()
 
     return f"{name_part}@{generate_uuid()[:5]}" # Expected output: Joe Antiporda Gonzales >> ja.gonzales-X3F53
-
-
-def censor_email(email: str) -> str:
-    try:
-        local, domain = email.split("@")
-        domain_name, domain_ext = domain.rsplit(".", 1)
-        
-        def mask(part: str) -> str:
-            if len(part) <= 2:
-                return part[0] + "*" * (len(part) - 1)
-            return part[0] + "*" * (len(part) - 2) + part[-1]
-        
-        return f"{mask(local)}@{mask(domain_name)}.{domain_ext}"
-    
-    except ValueError:
-        raise ValueError("Invalid email format")

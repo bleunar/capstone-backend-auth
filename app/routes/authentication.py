@@ -91,10 +91,17 @@ def login():
         "user_id": account_database['data']['id'],
         "access_level": account_database['data']['access_level']
     }
-
-    response = common_success_response(data=response_data, message="Login successful")
-    set_refresh_cookies(response, refresh_token)
-    return response
+    
+    response_tuple = common_success_response(data=response_data, message="Login successful")
+    response = response_tuple[0]  # get actual Response object
+    response.set_cookie(
+        "refresh_token",
+        refresh_token,
+        httponly=True,
+        secure=True,
+        samesite="None"
+    )
+    return response_tuple
 
 
 
@@ -129,7 +136,7 @@ def logout():
 def refresh_access():
     account_id = get_jwt_identity()
     if not account_id:
-        return common_error_response("Failed to refresh, identity not found", 400)
+        return common_error_response("Failed to refresh", 400)
 
     refresh_query = """
         SELECT

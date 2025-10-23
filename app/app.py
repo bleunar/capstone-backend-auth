@@ -6,7 +6,7 @@ from flask_cors import CORS
 from .services.system import get_service_information
 from .services.core import get_flask_app
 from .services.system import system_check
-from prometheus_flask_exporter import PrometheusMetrics
+
 
 app = get_flask_app()
 app.config["SECRET_KEY"] = config.FLASK_SECRET_KEY
@@ -20,12 +20,14 @@ app.config["JWT_COOKIE_HTTPONLY"] = True
 app.config["JWT_COOKIE_CSRF_PROTECT"] = True
 app.url_map.strict_slashes = False
 
+
 # ENDPOINTS FROM BLUEPRINTS
 from .routes.authentication import auth_bp
 app.register_blueprint(auth_bp, url_prefix="/")
 
 
 ph_time = datetime.datetime.now(ZoneInfo("Asia/Manila"))
+
 
 # status endpoint
 @app.route("/", methods=["GET"])
@@ -37,10 +39,10 @@ def status():
     }
     return jsonify(data)
 
+
 # setup CORS for all endpoint
 CORS(app, origins=config.WEB_CLIENT_HOSTS, supports_credentials=True)
 
-metrics = PrometheusMetrics(app)
 
 # main method
 def jarvis_deploy_website():

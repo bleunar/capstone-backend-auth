@@ -6,6 +6,7 @@ import time
 from flask_jwt_extended import JWTManager
 from flask import Flask
 from .log import log
+from prometheus_flask_exporter import PrometheusMetrics
 
 # instance of flask and jwt
 app = Flask(__name__)
@@ -14,6 +15,8 @@ jwt = JWTManager(app)
 
 # instance fetch
 def get_flask_app():
+    if config.ENABLE_PROMETRICS:
+        PrometheusMetrics(app)
     return app
 
 def get_jwt_manager():

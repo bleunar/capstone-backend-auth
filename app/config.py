@@ -16,6 +16,7 @@ class Config:
     BACKEND_ADDRESS = os.environ.get("BACKEND_ADDRESS", "localhost")
     BACKEND_PORT = os.environ.get("BACKEND_PORT", "5000")
     FLASK_ENVIRONMENT = os.environ.get("FLASK_ENVIRONMENT", "development")
+    ENABLE_PROMETRICS = os.getenv("ENABLE_PROMETRICS", "false").lower() in ("1", "true", "yes", "on")
 
     # flask server
     FLASK_SECRET_KEY = os.environ.get("SECRET_NI_FLASK", default_key)
@@ -23,12 +24,6 @@ class Config:
     
     JWT_ACCESS_TOKEN_EXPIRES = int(os.environ.get("TOKEN_ACCESS_DURATION", "15")) * 60 # 15 minute defult
     JWT_REFRESH_TOKEN_EXPIRES = int(os.environ.get("TOKEN_REFRESH_DURATION", "1440")) * 60  # 24 hours default
-
-    # mail server credentials
-    MAIL_SERVER_ADDRESS = os.environ.get("MAIL_SERVER_ADDRESS", "smpt.changeme.com")
-    MAIL_SERVER_PORT = os.environ.get("MAIL_SERVER_PORT", "123")
-    MAIL_ADDRESS = os.environ.get("MAIL_ADDRESS", "changeme@example.com")
-    MAIL_PASSKEY =  os.environ.get("MAIL_PASSKEY", "XXX XXXX XXX")
 
     # database
     MYSQL_POOL_SIZE = os.environ.get("MYSQL_POOL_SIZE", 10)
